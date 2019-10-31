@@ -15,25 +15,32 @@
     - Output rmax: suppression radius used to get max pts corners.
 '''
 
+import numpy as np
+
 def anms(cimg, max_pts):
     
-    # Create meshgrids
+    # Create meshgrids and flatten
     nr,nc = cimg.shape
-    cols,rows = np.meshgrid(range(nc),range(nr))
-    
-    # Flatten matrices
+    cols,rows = np.meshgrid(range(nc),range(nr)) 
     colsf = cols.flatten()
     rowsf = rows.flatten()
     cimgf = cimg.flatten()
     
-    # Zip with meshgrid
-    z = zip(cimgf,rowsf,colsf)
-    
     # Sort corners by decending score
+    z = zip(cimgf,rowsf,colsf)
     z = sorted(z, key=lambda x: x[0],reverse=True)
+    cimgf,rowsf,colsf = zip(*list(z))
+    cimgf = list(cimgf)
+    rowsf = list(rowsf)
+    colsf = list(colsf)
     
     # Threshold
-    
+    thresh = 0.2*cimgf[0]
+    cimgf[:] = [ele if ele > thresh else 0 for ele in cimgf]
+    cimgf = np.trim_zeros(cimgf)
+    length = len(cimgf)
+    rowsf = rowsf[0:length]
+    colsf = colsf[0:length]
     
     # Find distance to nearest corner with higher score (1-1.2x as sure)
     
@@ -42,6 +49,7 @@ def anms(cimg, max_pts):
     
     
     # Trim to N = max_pts corners
+    
     
     
     return x, y, rmax

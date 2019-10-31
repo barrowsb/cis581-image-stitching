@@ -1,7 +1,7 @@
 '''
   File name: corner_detector.py
-  Author:
-  Date created:
+  Author: Brian Barrows, Zachary Fisher, Michael Woc
+  Date created: 10/31/2019
 '''
 
 '''
@@ -12,7 +12,7 @@
     - Output cimg: H × W matrix representing the corner metric matrix.
 '''
 import cv2
-import numpy as np
+
 def corner_detector(img):
     
   # Calcuate Corners  

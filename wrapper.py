@@ -1,5 +1,5 @@
 '''
-  File name: corner_detector.py
+  File name: wrapper.py
   Authors: Brian Barrows, Zachary Fisher, Michael Woc
   Date created: 10/31/2019
 '''

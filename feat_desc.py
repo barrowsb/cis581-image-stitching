@@ -1,7 +1,7 @@
 '''
   File name: feat_desc.py
-  Author:
-  Date created:
+  Author: Barrows, Fisher, & Woc
+  Date created: 11/2/2019
 '''
 
 '''
@@ -22,52 +22,30 @@ def feat_desc(img, x, y):
     
     # Setup Parameters
     rows, cols = img.shape
-    descs = np.zeros(8)
+    numPts, dim = x.shape
+    descs = np.zeros((8,8,numPts))
     
-    # Using SIFT
-    #sift = cv2.xfeatures2d.SIFT_create
-    #kp, descs = sift.compute(img,None)
-    
-    # Gaussian Distribution of Image
-    #blur = cv2.GaussianBlur(img,(5,5),0)
-    
-    # Gaussian filter definition
-    G = [2,4,5,4,2;4,9,12,9,4;5,12,15,12,5;4,9,12,9,4;2,4,5,4,2]
-    G = 1/159.*G
-    
-    # Filter for horiztonal and vertical direction
-    dx, dy = gradient(G)
-    
-    # Convolution of image with Gaussian
-    Gx = conv2(G, dx, 'same')
-    Gy = conv2(G, dy, 'same')
-    
-    # Convolution of image with Gx and Gy
-    Magx = conv2(img, Gx, 'same')
-    Magy = conv2(img, Gy, 'same')
-    
-    # Gradient Magnitude
-    Mag = sqrt(Magy.^2 + Magx.^2)
-    
-    # Gradient Angle
-    Ori = atan2(Magy, Magx)
-    
-    # Sample from a 40x40 window to get 8x8 pixels
+    # Pad Input Image with Zeros
+    img = np.pad(img, [20, 20], mode='constant')
+
+    # Shift Input Coordinates To Be Within Padding
+    x = x + 20
+    y = y + 20    
+
     # Loop Through Interest Points
-    '''
-    for i in y:
-        # Loop Through Rows of Patch Window
-        for j in 8:
-            # Loop Through Cols of Patch Window
-            for k in 8:
-                descs(j,k,i) = img(y(i-20,1), x(i-20,1))
-                -20,-20     -20,-15     -20,-10
-    '''
-            
+    for i in range(0,numPts):
+        # Loop Through Rows
+        for j in range(0,8):
+            # Loop Through Cols
+            for k in range(0,8):
+                # Create 8x8 Patch from Maximums in 5x5's within 40x40
+                rowStart = int(y[i]-20+(j*5))
+                rowEnd = int(y[i]-15+(j*5))
+                colStart = int(x[i]-20+(k*5))
+                colEnd = int(x[i]-15+(k*5))
+                smallWindow = img[rowStart:rowEnd, colStart:colEnd]
+                descs[j,k,i] = np.max(smallWindow)
+        # Normalize to Mean of 0 and Standard Deviation of 1
+        descs[:,:,i] = (descs[:,:,i] - np.mean(descs[:,:,i])) / np.std(descs[:,:,i])
     
-    # Normalize to Mean of 0
-  
-    # Normalize to Standard Deviation of 1
-  
-  
     return descs

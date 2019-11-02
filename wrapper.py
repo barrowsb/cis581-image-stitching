@@ -31,23 +31,25 @@ grayM = cv2.cvtColor(imgM, cv2.COLOR_BGR2GRAY)
 grayR = cv2.cvtColor(imgR, cv2.COLOR_BGR2GRAY)
 
 # Feature Detection
-[cimg] = corner_detector(grayL)
+cimg = corner_detector(grayL)
 
 # Adaptive Non-Maximal Suppression
 max_pts = 
-[x,y,rmax] = anms(cimg, max_pts)
+x,y,rmax = anms(cimg, max_pts)
 
 # Feature Descriptors
-[descs] = feat_desc(grayL, x, y)
+descsL = feat_desc(grayL, xL, yL)
+descsM = feat_desc(grayM, xM, yM)
+descsR = feat_desc(grayR, xR, yR)
 
 # Feature Matching
-[match] = feat_match(descs1, descs2)
+match = feat_match(descs1, descs2)
 
 # RAndom Sampling Consensus (RANSAC)
-[H, inlier_ind] = ransac_est_homography(x1, y1, x2, y2, thresh)
+H, inlier_ind = ransac_est_homography(x1, y1, x2, y2, thresh)
 
 # Frame Mosaicing
-[img_mosaic] = mymosaic(img_input)
+img_mosaic = mymosaic(img_input)
 
 
 

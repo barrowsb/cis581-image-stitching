@@ -18,12 +18,12 @@
 def feat_desc(img, x, y):
 
     import numpy as np
-    import cv2
     
     # Setup Parameters
     rows, cols = img.shape
     numPts, dim = x.shape
-    descs = np.zeros((8,8,numPts))
+    matrix = np.zeros((8,8,numPts))
+    descs = np.zeros((64,numPts))
     
     # Pad Input Image with Zeros
     img = np.pad(img, [20, 20], mode='constant')
@@ -44,8 +44,12 @@ def feat_desc(img, x, y):
                 colStart = int(x[i]-20+(k*5))
                 colEnd = int(x[i]-15+(k*5))
                 smallWindow = img[rowStart:rowEnd, colStart:colEnd]
-                descs[j,k,i] = np.max(smallWindow)
+                matrix[j,k,i] = np.max(smallWindow)
+        
         # Normalize to Mean of 0 and Standard Deviation of 1
-        descs[:,:,i] = (descs[:,:,i] - np.mean(descs[:,:,i])) / np.std(descs[:,:,i])
-    
+        matrix[:,:,i] = (matrix[:,:,i] - np.mean(matrix[:,:,i])) / np.std(matrix[:,:,i])
+       
+        # Reshape matrix to be 64xnumPts
+        descs[:,i] = np.reshape(matrix[:,:,i], 64)
+        
     return descs

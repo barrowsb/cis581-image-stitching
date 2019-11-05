@@ -44,10 +44,11 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
       # Calculate Distances and Compare to Threshold, must be less than threshold
       
   # Compute Homography with Inliers
-  for i in range(nRANSAC):
+  for i in range(len(inlier_ind)):
 
       for j in range(0,nPairs):
-          k = match_Sample[j]
+          k = inlier_ind[j]
       # Estimate Homography 
       H = est_homography(x1[k],y1[k],x2[k],y2[k])
+      
   return H, inlier_ind

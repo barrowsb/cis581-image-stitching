@@ -20,8 +20,8 @@ import numpy as np
 def anms(cimg, max_pts):
     
     # Tune for thresholding
-    thresh1 = 0.2 # pre-threshold
-    thresh2 = 1.2 # anms-threshold
+    thresh1 = 0.1 # pre-threshold
+    thresh2 = 1.05 # anms-threshold
     
     # %% Pre-thresholding
     
@@ -32,7 +32,7 @@ def anms(cimg, max_pts):
     rowsf = rows.flatten()
     cimgf = cimg.flatten()
     
-    # Sort corners by decending score
+    # Sort corners by decending corner-metric
     z = zip(cimgf,rowsf,colsf)
     z = sorted(z, key=lambda x: x[0],reverse=True)
     cimgf,rowsf,colsf = zip(*list(z))
@@ -58,21 +58,22 @@ def anms(cimg, max_pts):
     dist2 = np.zeros((length,length)) # distance^2 matrix (from ref to compare corner)
     
     # Find all corners above anms-threshold
-    ref,compare = np.meshgrid(cimgf,cimgf) # row-wise and column-wise matrices of cimgf vectors
+    compare,ref = np.meshgrid(cimgf,cimgf) # row-wise and column-wise matrices of cimgf vectors
     anmsthresh = ref*thresh2
     greater = compare > anmsthresh
     
-    # Compute distance from all ref corners to all other corners
+    # Compute distance from all corners (ref) to all other corners (comp)
     rows_comp,cols_comp = np.meshgrid(rowsf,colsf) # row-wise and column-wise matrices of indices
     rows_ref = np.transpose(rows_comp) # (rows_ref does not change row-wise, rows_comp does)
     cols_ref = np.transpose(cols_comp) # (cols_ref does not change row-wise, cols_comp does)
     dist2 = (rows_ref - rows_comp)**2 + (cols_ref - cols_comp)**2
 
-    # Find minimum distance (read: radius of separation) where true in Boolean matrix (greater)
+    # Find minimum distance to other corner above thresh
     logical_dist2 = np.where(greater,dist2,np.ones((length,length))*inf) # inf where not(greater)
-    j_min = np.argmin(logical_dist2,axis=1) # col (j) indices of row-wise minimum
-    i_min = np.linspace(0,length-1,length,dtype=int) # row (i) indices
-    min_dist2 = dist2[i_min,j_min] # minimum distance to (anms-thresheld) larger corner
+    j_min = np.argmin(logical_dist2,axis=1) # col (j) indices of minimum distance in each row
+    i_min =  np.asarray(range(length)) # row (i) indices
+    min_dist2 = dist2[i_min,j_min] # minimum distance to sufficiently larger corner
+    ### DOES NOT IGNORE POINTS THAT ARE GREATEST OR DUPLICATES
     
     # Find row and col indices of minimum distance from above
     min_rows = np.asarray(rowsf)[j_min]
@@ -88,7 +89,7 @@ def anms(cimg, max_pts):
     
     # Set outputs, trimmed to N = max_pts corners
     x = min_cols_sorted[0:max_pts]
-    y = min_rows_sorted[0:max_pts]    
+    y = min_rows_sorted[0:max_pts]
     rmax = min_dist2_sorted[max_pts]
     
     return x, y, rmax

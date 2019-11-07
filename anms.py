@@ -73,7 +73,6 @@ def anms(cimg, max_pts):
     j_min = np.argmin(logical_dist2,axis=1) # col (j) indices of minimum distance in each row
     i_min =  np.asarray(range(length)) # row (i) indices
     min_dist2 = dist2[i_min,j_min] # minimum distance to sufficiently larger corner
-    ### DOES NOT IGNORE POINTS THAT ARE GREATEST OR DUPLICATES
     
     # Find row and col indices of minimum distance from above
     min_rows = np.asarray(rowsf)[j_min]
@@ -90,6 +89,6 @@ def anms(cimg, max_pts):
     # Set outputs, trimmed to N = max_pts corners
     x = min_cols_sorted[0:max_pts]
     y = min_rows_sorted[0:max_pts]
-    rmax = min_dist2_sorted[max_pts]
+    rmax = np.sqrt(min_dist2_sorted[max_pts])
     
     return x, y, rmax

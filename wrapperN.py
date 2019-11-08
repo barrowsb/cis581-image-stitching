@@ -34,19 +34,25 @@ grayR = cv2.cvtColor(imgR, cv2.COLOR_BGR2GRAY)
 cimgL = corner_detector(grayL)
 cimgM = corner_detector(grayM)
 cimgR = corner_detector(grayR)
+print('corner_detector')
+
 # Adaptive Non-Maximal Suppression
 max_pts = 100
 xL,yL,rmaxL = anms(cimgL, max_pts)
 xM,yM,rmaxM = anms(cimgM, max_pts)
 xR,yR,rmaxR = anms(cimgR, max_pts)
+print('anms')
+
 # Feature Descriptors
 descsL = feat_desc(grayL, xL, yL)
 descsM = feat_desc(grayM, xM, yM)
 descsR = feat_desc(grayR, xR, yR)
+print('feat_desc')
 
 # Feature Matching
 matchL = feat_match(descsM, descsL)
 matchR = feat_match(descsM, descsR)
+print('feat_match')
 
 # Get feature coordiantes
 for i in range(len(matchL)):
@@ -56,6 +62,7 @@ for i in range(len(matchL)):
         x2L = xL[matchL(i)]
         y2L = xL[matchL(i)]
     else:
+        print('placeholder')
         
 for i in range(len(matchR)):
     if (matchR(i) != -1):
@@ -64,22 +71,22 @@ for i in range(len(matchR)):
         x2R = xR[matchR(i)]
         y2R = xR[matchR(i)]
     else:
-        
+        print('placeholder')
+print('feat coords')
+
 # RAndom Sampling Consensus (RANSAC)
 threshL = 0.5
 threshR = 0.5
 HL, inlier_indL = ransac_est_homography(x1ML, y1ML, x2L, y2L, threshL)
 HR, inlier_indR = ransac_est_homography(x1MR, y1MR, x2R, y2R, threshR)
+print('RANSAC')
 
 # Frame Mosaicing
 img_mosaic = mymosaic(imgL,imgM,imgR,HL,HR)
 
-
-
-
-# Show Image Code
-#cv2.namedWindow('Left Image', cv2.WINDOW_NORMAL)
-#cv2.resizeWindow('Left Image', 600, 600)
-#cv2.imshow('Left Image',imgL)
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
+# Show Mosaic
+cv2.namedWindow('Mosaic', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('Mosaic', 600, 600)
+cv2.imshow('Mosaic', img_mosaic)
+cv2.waitKey(0)
+cv2.destroyAllWindows()

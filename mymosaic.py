@@ -30,8 +30,9 @@ def mymosaic(img_left,img_middle,img_right,H12,H32):
   img_right_warp = np.zeros((nRows, nCols+padding, nCh))
   
   # Homography
-  pR_out = dot(H32, [pR_in[0], pR_in[1], 1])
-  homog_out_R = np.array(pR_out[0]/pR_out[2], pR_out[1]/pR_out[2])
+  #pR_out = dot(H32, [pR_in[0], pR_in[1], 1])
+  #homog_out_R = np.array(pR_out[0]/pR_out[2], pR_out[1]/pR_out[2])
+  homog_out_R = np.convolve(H32, img_right)
   
   # Loop Through Color Channels and Warp the Right Side Image
   for c in range(nCh):
@@ -59,8 +60,9 @@ def mymosaic(img_left,img_middle,img_right,H12,H32):
   img_left_warp = np.zeros((stitch_rows, stitch_cols+padding, nCh))
   
   # Homography
-  pL_out = dot(H12, [pL_in[0], pL_in[1], 1])
-  homog_out_L = np.array(p_out[0]/p_out[2], p_out[1]/p_out[2])
+  #pL_out = dot(H12, [pL_in[0], pL_in[1], 1])
+  #homog_out_L = np.array(p_out[0]/p_out[2], p_out[1]/p_out[2])
+  homog_out_L = np.convolve(H12, img_left)
   
   # Warp the Left Side Image
   for c in range(3):

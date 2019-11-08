@@ -87,8 +87,8 @@ def anms(cimg, max_pts):
     min_cols_sorted = list(min_cols_sorted)
     
     # Set outputs, trimmed to N = max_pts corners
-    x = min_cols_sorted[0:max_pts]
-    y = min_rows_sorted[0:max_pts]
+    x = np.reshape(np.asarray(min_cols_sorted[0:max_pts]),(max_pts,1))
+    y = np.reshape(np.asarray(min_rows_sorted[0:max_pts]),(max_pts,1))
     rmax = np.sqrt(min_dist2_sorted[max_pts])
     
     return x, y, rmax

@@ -32,22 +32,14 @@ def anms(cimg, max_pts):
     rowsf = rows.flatten()
     cimgf = cimg.flatten()
     
-    # Sort corners by decending corner-metric
-    z = zip(cimgf,rowsf,colsf)
-    z = sorted(z, key=lambda x: x[0],reverse=True)
-    cimgf,rowsf,colsf = zip(*list(z))
-    cimgf = list(cimgf)
-    rowsf = list(rowsf)
-    colsf = list(colsf)
-    
     # Threshold
-    prethresh = thresh1*cimgf[0]
-    #cimgf[:] = [ele if ele > prethresh else 0 for ele in cimgf]
-    cimgf = list(np.where(cimgf>prethresh, np.asarray(cimgf), np.zeros((nr*nc,))))
-    cimgf = np.trim_zeros(cimgf)
+    prethresh = thresh1*np.amax(cimgf)
+    cimgf = np.where(cimgf>prethresh, np.asarray(cimgf), np.zeros((nr*nc,)))
+    indices = np.nonzero(cimgf)
+    cimgf = list(cimgf[indices])
+    rowsf = list(rowsf[indices])
+    colsf = list(colsf[indices])
     length = len(cimgf)
-    rowsf = rowsf[0:length]
-    colsf = colsf[0:length]
     
     # %% ANMS
     

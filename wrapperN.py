@@ -49,15 +49,6 @@ xL,yL,rmaxL = anms(cimgL, max_pts)
 xM,yM,rmaxM = anms(cimgM, max_pts)
 xR,yR,rmaxR = anms(cimgR, max_pts)
 
-print('leftX')
-print(xL)
-print('rightX')
-print(yL)
-print('midX')
-print(xM)
-print('midY')
-print(yM)
-
 # Feature Descriptors
 descsL = feat_desc(grayL, xL, yL)
 descsM = feat_desc(grayM, xM, yM)

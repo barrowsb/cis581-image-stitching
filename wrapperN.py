@@ -83,8 +83,8 @@ for i in range(len(matchL)):
         x2L.append(xL[int(matchL[i])])
         y2L.append(xL[int(matchL[i])])
     if (matchR[i] != -1):
-        x1MR.append(xM[int(matchL[i])])
-        y1MR.append(yM[int(matchL[i])])
+        x1MR.append(xM[int(matchR[i])])
+        y1MR.append(yM[int(matchR[i])])
         x2R.append(xR[int(matchR[i])])
         y2R.append(xR[int(matchR[i])])
 

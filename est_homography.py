@@ -27,6 +27,7 @@ def est_homography(x, y, X, Y):
     a = np.array([x[i], y[i], 1]).reshape(-1, 3)
     c = np.array([[X[i]], [Y[i]]])
     d = - c * a
+    d = np.squeeze(d)
 
     A[2 * i, 0 : 3], A[2 * i + 1, 3 : 6]= a, a
     A[2 * i : 2 * i + 2, 6 : ] = d

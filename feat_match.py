@@ -20,15 +20,17 @@ def feat_match(descs1, descs2):
   from numpy import linalg as LA
 
   # Setup Parameters
-  bestComparison = 100000             # Set to be easily replaced
-  secondBestComparison = 100000       # Set to be easily replaced
   numPixels1, numPts1 = descs1.shape  # Where numPixels is 64
   numPixels2, numPts2 = descs2.shape
   match = np.zeros((numPts1,1))       # Initializing match outputs
-  threshold = 0.6                     # Ratio Test Threshold
+  threshold = 0.2                     # Ratio Test Threshold
   
   # Loop through each feature description in descs1
   for i in range(0,numPts1):
+      
+      bestComparison = 100000             # Set to be easily replaced
+      secondBestComparison = 100000       # Set to be easily replaced
+      
       # Loop through each feature description in descs2
       for j in range(0,numPts2):          
           # Compare every descs2 to each individual descs1
@@ -40,10 +42,12 @@ def feat_match(descs1, descs2):
           # If the current comparison is not the best and better than the second best
           elif (comparison < secondBestComparison):
               secondBestComparison = comparison  # update the variable
+              
       # Ratio Test between best and second best comparisons
-      if (bestComparison/secondBestComparison < threshold):
-          match[i] = index  # Record the index in descs2 that matches descs1
-      else:   # If the ratio test was not passed
-          match[i] = -1    # return that no match is found
-    
+      #if (bestComparison/secondBestComparison < threshold):
+          #match[i] = index  # Record the index in descs2 that matches descs1
+      #else:   # If the ratio test was not passed
+          #match[i] = -1    # return that no match is found
+          
+      match[i] = index
   return match

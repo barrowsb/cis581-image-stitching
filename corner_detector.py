@@ -17,7 +17,5 @@ def corner_detector(img):
     
   # Calcuate Corners  
   cimg = cv2.cornerHarris(img,2,3,0.04)
-  # Dilate Corners
-  cimg = cv2.dilate(cimg,None)
-    
+
   return cimg

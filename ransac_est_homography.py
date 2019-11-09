@@ -31,30 +31,37 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
   inlier_idx = [] 
   # Number of Inliers
   nInliers = 0 
+  
+  im1_x = np.zeros(shape=(4,1))
+  im1_y = np.zeros(shape=(4,1))
+  im2_x = np.zeros(shape=(4,1))
+  im2_y = np.zeros(shape=(4,1))
+  
   for i in range(nRANSAC):
       # Choose 4 Random Indexes for Feature Pairs
       match_Sample = random.sample(pairIndex,nPairs)
       # range(0,nPairs)
       for j in range(nPairs):
           k = match_Sample[j]
-          im1_x = x1[k]
-          im1_y = y1[k]
-          im2_x = x2[k]
-          im2_y = y2[k]
+          im1_x[j] = x1[k]
+          im1_y[j] = y1[k]
+          im2_x[j] = x2[k]
+          im2_y[j] = y2[k]
+
       # Estimate Homography 
       H_Est = est_homography(im1_x,im1_y,im2_x,im2_y)
       
       # Compute Inliers
       for m in range(len(x1)):
           # Transpose Image 1 Point
-          im1_pt = np.array(im1_x[m], im1_y[m], 1).T
+          im1_pt = np.array([[x1[m]], [y1[m]], [1]])
           # Combine Image 2 Point Coordinates
-          im2_pt = np.array(im2_x[m], im2_y[m])
+          im2_pt = np.array([x2[m], y2[m]])
           # Transform Image 1 Point
           im1_T = np.dot(H_Est,im1_pt) 
           # Convert Homogenous Coordinates to X,Y coordinates
-          norm1 = np.array(im1_T[0]/im1_T[2], im1_T[1]/im1_T[2]) 
-          
+          #norm1 = np.array([float(im1_T[0])/float(im1_T[2]), float(im1_T[1])/float(im1_T[2])]) 
+          norm1 = np.array([im1_T[0]/im1_T[2], im1_T[1]/im1_T[2]]) 
           # Calculate Distances and Error and Compare to Threshold, 
           # Must be less than or eqaul to threshold
           if (np.linalg.norm(norm1-im2_pt) <= thresh):

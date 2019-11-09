@@ -29,9 +29,22 @@ from mymosaic import *
 #imgM = cv2.imread('eng_middle.jpg')
 #imgR = cv2.imread('eng_right.jpg')
 
-imgL = cv2.imread('new_left.jpg')
-imgM = cv2.imread('new_middle.jpg')
-imgR = cv2.imread('new_right.jpg')
+#imgL = cv2.imread('new_left.jpg')
+#imgM = cv2.imread('new_middle.jpg')
+#imgR = cv2.imread('new_right.jpg')
+
+imgL = cv2.imread('lib_left.jpg')
+imgM = cv2.imread('lib_middle.jpg')
+imgR = cv2.imread('lib_right.jpg')
+
+# Image Resizing
+scale_percent = 50 # percent of original size
+width = int(imgL.shape[1] * scale_percent / 100)
+height = int(imgL.shape[0] * scale_percent / 100)
+dim = (width, height)
+imgL = cv2.resize(imgL, dim, interpolation = cv2.INTER_AREA)
+imgM = cv2.resize(imgM, dim, interpolation = cv2.INTER_AREA)
+imgR = cv2.resize(imgR, dim, interpolation = cv2.INTER_AREA)
 
 # Grayscale
 grayL = cv2.cvtColor(imgL, cv2.COLOR_BGR2GRAY)
@@ -84,7 +97,6 @@ threshL = 0.5
 threshR = 0.5
 HL, inlier_indL = ransac_est_homography(x1ML, y1ML, x2L, y2L, threshL)
 HR, inlier_indR = ransac_est_homography(x1MR, y1MR, x2R, y2R, threshR)
-print('RANSAC')
 
 # Frame Mosaicing
 img_mosaic = mymosaic(imgL,imgM,imgR,HL,HR)

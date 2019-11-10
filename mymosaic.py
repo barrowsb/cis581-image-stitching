@@ -15,13 +15,14 @@
 
 import numpy as np
 from scipy.ndimage import geometric_transform
+from scipy.ndimage import convolve
 
 def mymosaic(img_left,img_middle,img_right,H12,H32):
   
   # Stitching From Right Image to Middle 
   # Dimensions of Each Image are Equal
   nRows, nCols, nCh = img_middle.shape
-  padding = nCols
+  padding = 2400 # or maybe nCols
   
   # Zero Pad Middle Image on its Right Side 
   img_middle_new = np.hstack((img_middle, np.zeros((nRows, padding, nCh))))
@@ -29,21 +30,25 @@ def mymosaic(img_left,img_middle,img_right,H12,H32):
   # Initialize Warped Right Image Size to Stitch onto Middle Image
   img_right_warp = np.zeros((nRows, nCols+padding, nCh))
   
-  # Homography
-  #pR_out = dot(H32, [pR_in[0], pR_in[1], 1])
-  #homog_out_R = np.array(pR_out[0]/pR_out[2], pR_out[1]/pR_out[2])
-  homog_out_R = np.convolve(H32, img_right)
-  
+  # Create Callable to Satisfy geometric_transform input criteria
+  def transformR(H32): 
+    homog_out_R = (2,2)
+    return homog_out_R
+
   # Loop Through Color Channels and Warp the Right Side Image
+  nRows_right, nCols_right, nCh = img_right.shape
+  img_right_warp = np.zeros(shape=(nRows_right, nCols_right, nCh))
   for c in range(nCh):
-    img_right_warp[:,:,c] = geometric_transform(img_right[:,:,c], homog_out_R, (nRows, nCols+padding))
+    img_right_warp[:,:,c] = convolve(img_right[:,:,c], H32, mode='constant')
+    #img_right_warp[:,:,c] = geometric_transform(img_right[:,:,c], transformR, (nRows, nCols+padding))
   
+  img_right_warp = np.hstack((np.zeros((nRows, padding, nCh)), img_right_warp))
+    
   # Calculate Alpha for Blending then Blend Warped Right Image with Middle Image
   alpha_right = ((img_right_warp[:,:,0] * img_right_warp[:,:,1] * img_right_warp[:,:,2]) > 0)
-  for c in range(3):
+  for c in range(nCh):
     # Foreground Img is Multiplied with Alpha, Background with (1-alpha)
     img_middle_new[:,:,c] = img_right_warp[:,:,c] * alpha_right + img_middle_new[:,:,c] * (1 - alpha_right)
-    
     
   # Stitching From Left Image to Updated Middle
   # Current Stitched Image Dimensions
@@ -51,27 +56,32 @@ def mymosaic(img_left,img_middle,img_right,H12,H32):
   
   # Affine Translation
   #H_delta = np.array([[1,0,0], [0,1,-nCols], [0,0,1]])
-  #H12 = dot(H12,H_delta)
+  #H12 = np.dot(H12,H_delta)
   
   # Zero Pad Middle Image on its Left Side 
-  img_mosaic = np.hstack((zeros((nRows, padding, nCh)), img_middle_new))
+  img_mosaic = np.hstack((np.zeros((nRows, padding, nCh)), img_middle_new))
   
   # Initialize Warped Left Image Size to Stitch onto Middle Image
   img_left_warp = np.zeros((stitch_rows, stitch_cols+padding, nCh))
-  
-  # Homography
-  #pL_out = dot(H12, [pL_in[0], pL_in[1], 1])
-  #homog_out_L = np.array(p_out[0]/p_out[2], p_out[1]/p_out[2])
-  homog_out_L = np.convolve(H12, img_left)
+    
+  # Create Callable to Satisfy geometric_transform input criteria
+  def transformL(H12): 
+    homog_out_L = (2,2)
+    return homog_out_L
   
   # Warp the Left Side Image
-  for c in range(3):
-    img_left_warp[:,:,c] = geometric_transform(img_left[:,:,c], homog_out_L, (stitch_rows, stitch_cols+padding))
+  nRows_left, nCols_left, nCh = img_left.shape
+  img_left_warp = np.zeros(shape=(nRows_left, nCols_left, nCh))
+  for c in range(nCh):
+    img_left_warp[:,:,c] = convolve(img_left[:,:,c], H12, mode='constant')
+    #img_left_warp[:,:,c] = geometric_transform(img_left[:,:,c], transformL, (stitch_rows, stitch_cols+padding))
+    
+  img_left_warp = np.hstack((img_left_warp, np.zeros((nRows, padding*2, nCh))))
     
   # Calculate Alpha for Blending then Blend Warped Left Image with Middle Image
   alpha_left = ((img_left_warp[:,:,0] * img_left_warp[:,:,1] * img_left_warp[:,:,2]) > 0)
-  for c in range(3):
+  for c in range(nCh):
     # Foreground Img is Multiplied with Alpha, Background with (1-alpha)
-    img_mosaic[:,:,c] = img_left_warp[:,:,c] * alpha + img_mosaic[:,:,c] * (1 - alpha_left)  
+    img_mosaic[:,:,c] = img_left_warp[:,:,c] * alpha_left + img_mosaic[:,:,c] * (1 - alpha_left)  
     
   return img_mosaic

@@ -83,13 +83,19 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
           
      # print("Iteration Number:", i) # Keep Track of Number of Iterations
   
+    
+  im1_xF = np.zeros(shape=(len(inliers),1))
+  im1_yF = np.zeros(shape=(len(inliers),1))
+  im2_xF = np.zeros(shape=(len(inliers),1))
+  im2_yF = np.zeros(shape=(len(inliers),1))
+  
   # Get Coordinates for Inliers
   for i in range(len(inliers)):
       j = inliers[i]
-      im1_xF = x1[j]
-      im1_yF = y1[j]
-      im2_xF = x2[j]
-      im2_yF = y2[j]
+      im1_xF[i] = x1[j]
+      im1_yF[i] = y1[j]
+      im2_xF[i] = x2[j]
+      im2_yF[i] = y2[j]
   
   # Compute Homography with Inliers
   H = est_homography(im1_xF,im1_yF,im2_xF,im2_yF)

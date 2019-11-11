@@ -14,16 +14,17 @@
                     feature i in descriptor descs1. If no match is found, you should put match i = −1.
 '''
 
+import numpy as np
+import cv2
+from numpy import linalg as LA
+
 def feat_match(descs1, descs2):
-  import numpy as np
-  import cv2
-  from numpy import linalg as LA
 
   # Setup Parameters
   numPixels1, numPts1 = descs1.shape  # Where numPixels is 64
   numPixels2, numPts2 = descs2.shape
   match = np.zeros((numPts1,1))       # Initializing match outputs
-  threshold = 0.2                     # Ratio Test Threshold
+  threshold = 0.4                     # Ratio Test Threshold
   
   # Loop through each feature description in descs1
   for i in range(0,numPts1):
@@ -37,6 +38,7 @@ def feat_match(descs1, descs2):
           comparison = LA.norm(descs1[:,i] - descs2[:,j])
           # If the current comparison is the best thus far
           if (comparison < bestComparison):
+              secondComparison = bestComparison
               bestComparison = comparison  # udpate the variable
               index = j                    # save the index
           # If the current comparison is not the best and better than the second best
@@ -44,10 +46,10 @@ def feat_match(descs1, descs2):
               secondBestComparison = comparison  # update the variable
               
       # Ratio Test between best and second best comparisons
-      #if (bestComparison/secondBestComparison < threshold):
-          #match[i] = index  # Record the index in descs2 that matches descs1
-      #else:   # If the ratio test was not passed
-          #match[i] = -1    # return that no match is found
+      if (bestComparison/secondBestComparison < threshold):
+          match[i] = index  # Record the index in descs2 that matches descs1
+      else:   # If the ratio test was not passed
+          match[i] = -1    # return that no match is found
           
       match[i] = index
   return match

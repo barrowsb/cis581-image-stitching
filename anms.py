@@ -79,6 +79,10 @@ def anms(cimg, max_pts):
     min_cols_sorted = list(min_cols_sorted)
     
     # Set outputs, trimmed to N = max_pts corners
+    found = len(min_cols_sorted)
+    if found < max_pts:
+        max_pts = found
+        print("Warning: found fewer than N corners above pre-threshold... N reduced to " + str(found) + ".")
     x = np.reshape(np.asarray(min_cols_sorted[0:max_pts]),(max_pts,1))
     y = np.reshape(np.asarray(min_rows_sorted[0:max_pts]),(max_pts,1))
     rmax = np.sqrt(min_dist2_sorted[max_pts])

@@ -50,6 +50,5 @@ def feat_match(descs1, descs2):
           match[i] = index  # Record the index in descs2 that matches descs1
       else:   # If the ratio test was not passed
           match[i] = -1    # return that no match is found
-          
-      match[i] = index
+
   return match

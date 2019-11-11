@@ -15,18 +15,22 @@
     - Outpuy descs: 64 × N matrix, with column i being the 64 dimensional descriptor (8 × 8 grid linearized) computed at location (xi , yi) in img.
 '''
 
-def feat_desc(img, x, y):
+import numpy as np
+from scipy.ndimage import gaussian_filter
 
-    import numpy as np
+def feat_desc(img, x, y):
     
     # Setup Parameters
     rows, cols = img.shape
-    numPts, dim = x.shape
+    numPts, dims = x.shape
     matrix = np.zeros((8,8,numPts))
     descs = np.zeros((64,numPts))
     
     # Pad Input Image with Zeros
     img = np.pad(img, [20, 20], mode='constant')
+
+    # Blur Image
+    img = gaussian_filter(img, sigma=5)
 
     # Shift Input Coordinates To Be Within Padding
     x = x + 20

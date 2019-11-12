@@ -20,6 +20,7 @@ from feat_match import *
 from ransac_est_homography import *
 from mymosaic import *
 import matplotlib.pyplot as plt
+from time import sleep
 
 # Import Images
 #imgL = cv2.imread('left.jpg')
@@ -119,18 +120,20 @@ for i in range(len(matchL)):
         y2R.append(yR[int(matchR[i])][0])
 
 # Plot results
+plt.figure(figsize=(16,9))
 correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
 plt.scatter(x=xL, y=yL, c='r', s=5)
 plt.scatter(x=xM+width, y=yM, c='r', s=5)
 for i in range(len(x1ML)):
-    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-',linewidth=1)
+    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'-',linewidth=1)
 plt.show()
 #
+plt.figure(figsize=(16,9))
 correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
 plt.scatter(x=xM, y=yM, c='r', s=5)
 plt.scatter(x=xR+width, y=yR, c='r', s=5)
 for i in range(len(x1MR)):
-    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=1)
+    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'-',linewidth=1)
 plt.show()
 
 print("feature matching complete")

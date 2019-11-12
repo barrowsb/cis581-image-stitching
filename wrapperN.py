@@ -123,14 +123,14 @@ correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
 plt.scatter(x=xL, y=yL, c='r', s=5)
 plt.scatter(x=xM+width, y=yM, c='r', s=5)
 for i in range(len(x1ML)):
-    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-')
+    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-',linewidth=1)
 plt.show()
 #
-correspMR = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
 plt.scatter(x=xM, y=yM, c='r', s=5)
 plt.scatter(x=xR+width, y=yR, c='r', s=5)
 for i in range(len(x1MR)):
-    plt.plot([x2R[i],x1MR[i]+width],[y2R[i],y1MR[i]],'y-')
+    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=1)
 plt.show()
 
 print("feature matching complete")

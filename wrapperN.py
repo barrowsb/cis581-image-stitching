@@ -40,7 +40,7 @@ imgR = cv2.imread('new_right.jpg')
 #imgR = cv2.imread('lib_right.jpg')
 
 # Image Resizing
-scale_percent = 50 # percent of original size
+scale_percent = 640/imgL.shape[1]*100 # percent of original size
 width = int(imgL.shape[1] * scale_percent / 100)
 height = int(imgL.shape[0] * scale_percent / 100)
 dim = (width, height)
@@ -87,9 +87,18 @@ print("anms complete")
 #%%
 
 # Feature Descriptors
-descsL = feat_desc(grayL, xL, yL)
-descsM = feat_desc(grayM, xM, yM)
-descsR = feat_desc(grayR, xR, yR)
+descsLR = feat_desc(imgL[:,:,0], xL, yL)
+descsLG = feat_desc(imgL[:,:,1], xL, yL)
+descsLB = feat_desc(imgL[:,:,2], xL, yL)
+descsL = np.concatenate((descsLR,descsLG,descsLB),axis=0)
+descsMR = feat_desc(imgM[:,:,0], xM, yM)
+descsMG = feat_desc(imgM[:,:,1], xM, yM)
+descsMB = feat_desc(imgM[:,:,2], xM, yM)
+descsM = np.concatenate((descsMR,descsMG,descsMB),axis=0)
+descsRR = feat_desc(imgR[:,:,0], xR, yR)
+descsRG = feat_desc(imgR[:,:,1], xR, yR)
+descsRB = feat_desc(imgR[:,:,2], xR, yR)
+descsR = np.concatenate((descsRR,descsRG,descsRB),axis=0)
 
 print("decriptors complete")
 #%%

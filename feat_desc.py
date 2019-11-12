@@ -54,12 +54,11 @@ def feat_desc(img, x, y):
                 smallWindow = img[rowStart:rowEnd, colStart:colEnd]
                 matrix[j,k,i] = np.max(smallWindow)
                 # End of Old Version
-                '''
                 
                 # New Version
                 if (j <= 3):
                     row = int(y[i]-20+(j*5))
-                else :
+                else:
                     row = int(y[i]-15+(j*5))
                 if (k <= 3):
                     col = int(x[i]-20+(k*5))
@@ -67,7 +66,13 @@ def feat_desc(img, x, y):
                     col = int(x[i]-15+(k*5))
                 matrix[j,k,i] = img[row, col]
                 # End of New Version
+                '''
                 
+                # Newest Version
+                row = int(y[i]-18+(j*5))
+                col = int(x[i]-18+(k*5))
+                matrix[j,k,i] = img[row, col]
+                # End of Newest Version
         
         # Normalize to Mean of 0 and Standard Deviation of 1
         matrix[:,:,i] = (matrix[:,:,i] - np.mean(matrix[:,:,i])) / np.std(matrix[:,:,i])

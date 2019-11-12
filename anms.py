@@ -20,8 +20,8 @@ import numpy as np
 def anms(cimg, max_pts):
     
     # Tune for thresholding
-    thresh1 = 0.1 # pre-threshold
-    thresh2 = 1.05 # anms-threshold
+    thresh1 = 0.005 # pre-threshold
+    thresh2 = 1.1   # anms-threshold
     
     # %% Pre-thresholding
     

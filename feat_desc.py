@@ -43,16 +43,20 @@ def feat_desc(img, x, y):
             # Loop Through Cols
             for k in range(0,8):
                 # Create 8x8 Patch from Maximums in 5x5's within 40x40
+                    
                                 
                 '''
+                # Old Version
                 rowStart = int(y[i]-20+(j*5))
                 rowEnd = int(y[i]-15+(j*5))
                 colStart = int(x[i]-20+(k*5))
                 colEnd = int(x[i]-15+(k*5))
                 smallWindow = img[rowStart:rowEnd, colStart:colEnd]
                 matrix[j,k,i] = np.max(smallWindow)
+                # End of Old Version
                 '''
                 
+                # New Version
                 if (j <= 3):
                     row = int(y[i]-20+(j*5))
                 else :
@@ -61,8 +65,8 @@ def feat_desc(img, x, y):
                     col = int(x[i]-20+(k*5))
                 else: 
                     col = int(x[i]-15+(k*5))
-                    
                 matrix[j,k,i] = img[row, col]
+                # End of New Version
                 
         
         # Normalize to Mean of 0 and Standard Deviation of 1

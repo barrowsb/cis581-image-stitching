@@ -109,15 +109,15 @@ x2R = []
 y2R = []
 for i in range(len(matchL)):
     if (matchL[i] != -1):
-        x1ML.append(xM[int(i)][0])
-        y1ML.append(yM[int(i)][0])
-        x2L.append(xL[int(matchL[i])][0])
-        y2L.append(yL[int(matchL[i])][0])
+        x1ML.append(xM[int(i)])
+        y1ML.append(yM[int(i)])
+        x2L.append(xL[int(matchL[i])])
+        y2L.append(yL[int(matchL[i])])
     if (matchR[i] != -1):
-        x1MR.append(xM[int(i)][0])
-        y1MR.append(yM[int(i)][0])
-        x2R.append(xR[int(matchR[i])][0])
-        y2R.append(yR[int(matchR[i])][0])
+        x1MR.append(xM[int(i)])
+        y1MR.append(yM[int(i)])
+        x2R.append(xR[int(matchR[i])])
+        y2R.append(yR[int(matchR[i])])
 
 # Plot results
 plt.figure(figsize=(16,9))

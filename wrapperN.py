@@ -57,15 +57,19 @@ cimgM = corner_detector(grayM)
 cimgR = corner_detector(grayR)
 
 # Adaptive Non-Maximal Suppression
-max_pts = 100
+max_pts = 200
 xL,yL,rmaxL = anms(cimgL, max_pts)
 xM,yM,rmaxM = anms(cimgM, max_pts)
 xR,yR,rmaxR = anms(cimgR, max_pts)
+
+print("anms complete")
 
 # Feature Descriptors
 descsL = feat_desc(grayL, xL, yL)
 descsM = feat_desc(grayM, xM, yM)
 descsR = feat_desc(grayR, xR, yR)
+
+print("decriptors complete")
 
 # Feature Matching
 matchL = feat_match(descsM, descsL)
@@ -82,15 +86,17 @@ x2R = []
 y2R = []
 for i in range(len(matchL)):
     if (matchL[i] != -1):
-        x1ML.append(xM[int(matchL[i])])
-        y1ML.append(yM[int(matchL[i])])
+        x1ML.append(xM[int(i)])
+        y1ML.append(yM[int(i)])
         x2L.append(xL[int(matchL[i])])
         y2L.append(xL[int(matchL[i])])
     if (matchR[i] != -1):
-        x1MR.append(xM[int(matchR[i])])
-        y1MR.append(yM[int(matchR[i])])
+        x1MR.append(xM[int(i)])
+        y1MR.append(yM[int(i)])
         x2R.append(xR[int(matchR[i])])
         y2R.append(xR[int(matchR[i])])
+        
+print("feature matching complete")
 
 # RAndom Sampling Consensus (RANSAC)
 threshL = 0.5
@@ -98,12 +104,14 @@ threshR = 0.5
 HL, inlier_indL = ransac_est_homography(x1ML, y1ML, x2L, y2L, threshL)
 HR, inlier_indR = ransac_est_homography(x1MR, y1MR, x2R, y2R, threshR)
 
+print("ransac complete")
+
 # Frame Mosaicing
 img_mosaic = mymosaic(imgL,imgM,imgR,HL,HR)
 
 # Show Mosaic
 cv2.namedWindow('Mosaic', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('Mosaic', 600, 600)
-cv2.imshow('Mosaic', img_mosaic)
+cv2.imshow('Mosaic', img_mosaic.astype(np.uint8))
 cv2.waitKey(0)
 cv2.destroyAllWindows()

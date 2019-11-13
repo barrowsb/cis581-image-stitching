@@ -12,10 +12,14 @@
     - Output cimg: H × W matrix representing the corner metric matrix.
 '''
 import cv2
+import numpy as np
 
 def corner_detector(img):
-    
-  # Calcuate Corners  
+  
+  # Blur image
+  img = cv2.blur(img,(5,5))
+
+  # Calcuate Corners
   cimg = cv2.cornerHarris(img,2,3,0.04)
 
   return cimg

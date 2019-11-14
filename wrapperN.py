@@ -160,15 +160,31 @@ print("feature matching complete")
 
 #%% Random Sampling Consensus (RANSAC)
 
+# Call functions
 threshL = 1
 threshR = 1
-#HL, inlier_indL = ransac_est_homography(x1ML, y1ML, x2L, y2L, threshL)
-#HR, inlier_indR = ransac_est_homography(x1MR, y1MR, x2R, y2R, threshR)
 HL, inlier_indL = ransac_est_homography(x2L, y2L, x1ML, y1ML, threshL)
 HR, inlier_indR = ransac_est_homography(x2R, y2R, x1MR, y1MR, threshR)
 
-#HL /= HL[2,2]
-#HR /= HR[2,2]
+# Plot results
+# Left & middle
+plt.figure(figsize=(16,9))
+correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+plt.scatter(x=xL, y=yL, c='r', s=5)
+plt.scatter(x=xM+width, y=yM, c='r', s=5)
+for i in range(len(x1ML)):
+    if inlier_indL[i]==1:
+        plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'-',linewidth=1)
+plt.show()
+# Middle & right
+plt.figure(figsize=(16,9))
+correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
+plt.scatter(x=xM, y=yM, c='r', s=5)
+plt.scatter(x=xR+width, y=yR, c='r', s=5)
+for i in range(len(x1MR)):
+    if inlier_indR[i]==1:
+        plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'-',linewidth=1)
+plt.show()
 
 print("HL:")
 print(HL)
@@ -183,21 +199,21 @@ img_mosaic = mymosaic(imgL,imgM,imgR,HL,HR)
 
 # Show Mosaic
 cv2.namedWindow('Mosaic', cv2.WINDOW_NORMAL)
-cv2.resizeWindow('Mosaic', 600, 600)
+cv2.resizeWindow('Mosaic', 1200, 400)
 cv2.imshow('Mosaic', img_mosaic.astype(np.uint8))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 #%% OpenCV Sanity Check
 
-# Compute homographies
-src_pts = np.float32([(x,y) for x,y in zip(x2L,y2L)]).reshape(-1, 1, 2)
-dst_pts = np.float32([(x,y) for x,y in zip(x1ML,y1ML)]).reshape(-1, 1, 2)
-hlCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-src_pts = np.float32([(x,y) for x,y in zip(x2R,y2R)]).reshape(-1, 1, 2)
-dst_pts = np.float32([(x,y) for x,y in zip(x1MR,y1MR)]).reshape(-1, 1, 2)
-hrCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-
+## Compute homographies
+#src_pts = np.float32([(x,y) for x,y in zip(x2L,y2L)]).reshape(-1, 1, 2)
+#dst_pts = np.float32([(x,y) for x,y in zip(x1ML,y1ML)]).reshape(-1, 1, 2)
+#hlCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+#src_pts = np.float32([(x,y) for x,y in zip(x2R,y2R)]).reshape(-1, 1, 2)
+#dst_pts = np.float32([(x,y) for x,y in zip(x1MR,y1MR)]).reshape(-1, 1, 2)
+#hrCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+#
 ## Call function
 #img_mosaic = mymosaic(imgL,imgM,imgR,hlCV,hrCV)
 #

@@ -13,20 +13,22 @@
 
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 from corner_detector import *
 from anms import *
 from feat_desc import *
 from feat_match import *
 from ransac_est_homography import *
 from mymosaic import *
-import matplotlib.pyplot as plt
-from time import sleep
+from helper import *
 
 # Import Images
+# !! use new_ instead
 #imgL = cv2.imread('left.jpg')
 #imgM = cv2.imread('middle.jpg')
 #imgR = cv2.imread('right.jpg')
 
+# !! not a lot of overlap... very hard
 #imgL = cv2.imread('eng_left.jpg')
 #imgM = cv2.imread('eng_middle.jpg')
 #imgR = cv2.imread('eng_right.jpg')
@@ -54,39 +56,46 @@ grayM = cv2.cvtColor(imgM, cv2.COLOR_BGR2GRAY)
 grayR = cv2.cvtColor(imgR, cv2.COLOR_BGR2GRAY)
 
 print("preprocessing complete")
-#%%
 
-# Feature Detection
+#%% Feature Detection
+
 cimgL = corner_detector(grayL)
 cimgM = corner_detector(grayM)
 cimgR = corner_detector(grayR)
 
 print("corner detector complete")
-#%%
 
-# Adaptive Non-Maximal Suppression
-max_pts = 200
+#%% ANMS
+
+# call functions
+max_pts = 300
 xL,yL,rmaxL = anms(cimgL, max_pts)
 xM,yM,rmaxM = anms(cimgM, max_pts)
 xR,yR,rmaxR = anms(cimgR, max_pts)
 
+# ignore features near edge
+xL,yL = ignore_edge_pts(xL,yL,height,width,20)
+xM,yM = ignore_edge_pts(xM,yM,height,width,20)
+xR,yR = ignore_edge_pts(xR,yR,height,width,20)
+
 # plot results
+# left
 anmsL = plt.imshow(imgL)
 plt.scatter(x=xL, y=yL, c='r', s=5)
 plt.show()
-#
+# middle
 anmsM = plt.imshow(imgM)
 plt.scatter(x=xM, y=yM, c='r', s=5)
 plt.show()
-#
+# right
 anmsR = plt.imshow(imgR)
 plt.scatter(x=xR, y=yR, c='r', s=5)
 plt.show()
 
 print("anms complete")
-#%%
 
-# Feature Descriptors
+#%% Feature Descriptors
+
 descsLR = feat_desc(imgL[:,:,0], xL, yL)
 descsLG = feat_desc(imgL[:,:,1], xL, yL)
 descsLB = feat_desc(imgL[:,:,2], xL, yL)
@@ -101,9 +110,10 @@ descsRB = feat_desc(imgR[:,:,2], xR, yR)
 descsR = np.concatenate((descsRR,descsRG,descsRB),axis=0)
 
 print("decriptors complete")
-#%%
 
-# Feature Matching
+#%% Feature Matching
+
+# Call function
 matchL = feat_match(descsM, descsL)
 matchR = feat_match(descsM, descsR)
 
@@ -129,6 +139,7 @@ for i in range(len(matchL)):
         y2R.append(yR[int(matchR[i])])
 
 # Plot results
+# Left & middle
 plt.figure(figsize=(16,9))
 correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
 plt.scatter(x=xL, y=yL, c='r', s=5)
@@ -136,7 +147,7 @@ plt.scatter(x=xM+width, y=yM, c='r', s=5)
 for i in range(len(x1ML)):
     plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'-',linewidth=1)
 plt.show()
-#
+# Middle & right
 plt.figure(figsize=(16,9))
 correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
 plt.scatter(x=xM, y=yM, c='r', s=5)
@@ -146,20 +157,49 @@ for i in range(len(x1MR)):
 plt.show()
 
 print("feature matching complete")
-#%%
 
-# RAndom Sampling Consensus (RANSAC)
-threshL = 0.5
-threshR = 0.5
+#%% Feature Match Visualization
+
+# one-by-one (left & middle)
+for i in range(len(x1ML)):
+    print("left & middle #" + str(i))
+    plt.figure(figsize=(16,9))
+    correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+    plt.scatter(x=xL, y=yL, c='r', s=5)
+    plt.scatter(x=xM+width, y=yM, c='r', s=5)
+    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-',linewidth=2)
+    plt.show()
+    print()
+print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+# one-by-one (middle & right)
+for i in range(len(x1MR)):
+    print("middle and right #" + str(i))
+    plt.figure(figsize=(16,9))
+    correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
+    plt.scatter(x=xM, y=yM, c='r', s=5)
+    plt.scatter(x=xR+width, y=yR, c='r', s=5)
+    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=2)
+    plt.show()
+    print()
+
+#%% Random Sampling Consensus (RANSAC)
+
+threshL = 20
+threshR = 20
 HL, inlier_indL = ransac_est_homography(x1ML, y1ML, x2L, y2L, threshL)
 HR, inlier_indR = ransac_est_homography(x1MR, y1MR, x2R, y2R, threshR)
+#HL, inlier_indL = ransac_est_homography(x2L, y2L, x1ML, y1ML, threshL)
+#HR, inlier_indR = ransac_est_homography(x2R, y2R, x1MR, y1MR, threshR)
 
 print("ransac complete")
+print("HL:")
 print(HL)
+print("HR:")
 print(HR)
-#%%
 
-# Frame Mosaicing
+#%% Frame Mosaicing
+
+# Call function
 img_mosaic = mymosaic(imgL,imgM,imgR,HL,HR)
 
 # Show Mosaic

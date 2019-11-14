@@ -224,7 +224,7 @@ cv2.destroyAllWindows()
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
 
- #%% Feature Match Individualized Visualization
+#%% Feature Match Individualized Visualization
 
 ## one-by-one (left & middle)
 #for i in range(len(x1ML)):
@@ -247,3 +247,33 @@ cv2.destroyAllWindows()
 #    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=2)
 #    plt.show()
 #    print()
+ 
+#%% RANSAC Match Individualized Visualization
+
+## one-by-one (left & middle)
+#count = 1
+#for i in range(len(x1ML)):
+#    if inlier_indL[i]==1:
+#        print("left & middle #" + str(count))
+#        plt.figure(figsize=(16,9))
+#        correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+#        plt.scatter(x=xL, y=yL, c='r', s=5)
+#        plt.scatter(x=xM+width, y=yM, c='r', s=5)
+#        plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-',linewidth=2)
+#        plt.show()
+#        count += 1
+#        print()
+#print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+## one-by-one (middle & right)
+#count = 1
+#for i in range(len(x1MR)):
+#    if inlier_indR[i]==1:
+#        print("middle and right #" + str(count))
+#        plt.figure(figsize=(16,9))
+#        correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
+#        plt.scatter(x=xM, y=yM, c='r', s=5)
+#        plt.scatter(x=xR+width, y=yR, c='r', s=5)
+#        plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=2)
+#        plt.show()
+#        count += 1
+#        print()

@@ -158,44 +158,23 @@ plt.show()
 
 print("feature matching complete")
 
-#%% Feature Match Visualization
-
-# one-by-one (left & middle)
-for i in range(len(x1ML)):
-    print("left & middle #" + str(i))
-    plt.figure(figsize=(16,9))
-    correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
-    plt.scatter(x=xL, y=yL, c='r', s=5)
-    plt.scatter(x=xM+width, y=yM, c='r', s=5)
-    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-',linewidth=2)
-    plt.show()
-    print()
-print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-# one-by-one (middle & right)
-for i in range(len(x1MR)):
-    print("middle and right #" + str(i))
-    plt.figure(figsize=(16,9))
-    correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
-    plt.scatter(x=xM, y=yM, c='r', s=5)
-    plt.scatter(x=xR+width, y=yR, c='r', s=5)
-    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=2)
-    plt.show()
-    print()
-
 #%% Random Sampling Consensus (RANSAC)
 
-threshL = 20
-threshR = 20
-HL, inlier_indL = ransac_est_homography(x1ML, y1ML, x2L, y2L, threshL)
-HR, inlier_indR = ransac_est_homography(x1MR, y1MR, x2R, y2R, threshR)
-#HL, inlier_indL = ransac_est_homography(x2L, y2L, x1ML, y1ML, threshL)
-#HR, inlier_indR = ransac_est_homography(x2R, y2R, x1MR, y1MR, threshR)
+threshL = 1
+threshR = 1
+#HL, inlier_indL = ransac_est_homography(x1ML, y1ML, x2L, y2L, threshL)
+#HR, inlier_indR = ransac_est_homography(x1MR, y1MR, x2R, y2R, threshR)
+HL, inlier_indL = ransac_est_homography(x2L, y2L, x1ML, y1ML, threshL)
+HR, inlier_indR = ransac_est_homography(x2R, y2R, x1MR, y1MR, threshR)
 
-print("ransac complete")
+#HL /= HL[2,2]
+#HR /= HR[2,2]
+
 print("HL:")
 print(HL)
 print("HR:")
 print(HR)
+print("ransac complete")
 
 #%% Frame Mosaicing
 
@@ -208,3 +187,47 @@ cv2.resizeWindow('Mosaic', 600, 600)
 cv2.imshow('Mosaic', img_mosaic.astype(np.uint8))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+#%% OpenCV Sanity Check
+
+# Compute homographies
+src_pts = np.float32([(x,y) for x,y in zip(x2L,y2L)]).reshape(-1, 1, 2)
+dst_pts = np.float32([(x,y) for x,y in zip(x1ML,y1ML)]).reshape(-1, 1, 2)
+hlCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+src_pts = np.float32([(x,y) for x,y in zip(x2R,y2R)]).reshape(-1, 1, 2)
+dst_pts = np.float32([(x,y) for x,y in zip(x1MR,y1MR)]).reshape(-1, 1, 2)
+hrCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+
+## Call function
+#img_mosaic = mymosaic(imgL,imgM,imgR,hlCV,hrCV)
+#
+## Show Mosaic
+#cv2.namedWindow('Mosaic', cv2.WINDOW_NORMAL)
+#cv2.resizeWindow('Mosaic', 600, 600)
+#cv2.imshow('Mosaic', img_mosaic.astype(np.uint8))
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
+
+ #%% Feature Match Individualized Visualization
+
+## one-by-one (left & middle)
+#for i in range(len(x1ML)):
+#    print("left & middle #" + str(i))
+#    plt.figure(figsize=(16,9))
+#    correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+#    plt.scatter(x=xL, y=yL, c='r', s=5)
+#    plt.scatter(x=xM+width, y=yM, c='r', s=5)
+#    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-',linewidth=2)
+#    plt.show()
+#    print()
+#print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+## one-by-one (middle & right)
+#for i in range(len(x1MR)):
+#    print("middle and right #" + str(i))
+#    plt.figure(figsize=(16,9))
+#    correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
+#    plt.scatter(x=xM, y=yM, c='r', s=5)
+#    plt.scatter(x=xR+width, y=yR, c='r', s=5)
+#    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=2)
+#    plt.show()
+#    print()

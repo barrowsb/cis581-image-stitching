@@ -1,105 +1,249 @@
 '''
-  File name: ransac_est_homography.py
-  Author: Brian Barrows, Zachary Fisher, Michael Woc
-  Date created: 11/3/2019
+  File name: wrapper.py
+  Authors: Brian Barrows, Zachary Fisher, Michael Woc
+  Date created: 10/31/2019
 '''
 
 '''
   File clarification:
-    Use a robust method (RANSAC) to compute a homography. Use 4-point RANSAC as 
-    described in class to compute a robust homography estimate:
-    - Input x1, y1, x2, y2: N × 1 vectors representing the correspondences feature coordinates in the first and second image. 
-                            It means the point (x1_i , y1_i) in the first image are matched to (x2_i , y2_i) in the second image.
-    - Input thresh: the threshold on distance used to determine if transformed points agree.
-    - Outpuy H: 3 × 3 matrix representing the homograph matrix computed in final step of RANSAC.
-    - Output inlier_ind: N × 1 vector representing if the correspondence is inlier or not. 1 means inlier, 0 means outlier.
+      This is the test script to execute all of the ".py" files in this folder.
+      Adjust input images here if needed. 
+    
 '''
 
 import numpy as np
-import random
-from est_homography import est_homography
+import cv2
+import matplotlib.pyplot as plt
+from corner_detector import *
+from anms import *
+from feat_desc import *
+from feat_match import *
+from ransac_est_homography import *
+from mymosaic import *
+from helper import *
 
-def ransac_est_homography(x1, y1, x2, y2, thresh):
-    # Desired Number of Feature Pairs
-    nPairs = 4
-    # Desired Number of Iterations
-    nRANSAC = 1000
-    # Generate Indexes
-    pairIndex = list(range(len(x1)))
-    # T/F Vector for Inlier or Outlier, temporary
-    inlier_indT = []
-    # Index of Inlier Point
-    inlier_idx = []
-    # Number of Inliers
-    nInliers = 0
-    # points
-    im1_x = np.zeros(shape=(4,1))
-    im1_y = np.zeros(shape=(4,1))
-    im2_x = np.zeros(shape=(4,1))
-    im2_y = np.zeros(shape=(4,1))
-    
-    # iterate ransac
-    for q in range(nRANSAC):
-        # Choose 4 Random Indexes for Feature Pairs
-        match_Sample = random.sample(pairIndex,nPairs)
-        # range(0,nPairs)
-        for j in range(nPairs):
-            k = match_Sample[j]
-            im1_x[j] = x1[k]
-            im1_y[j] = y1[k]
-            im2_x[j] = x2[k]
-            im2_y[j] = y2[k]
-        
-        # Estimate Homography 
-        H_Est = est_homography(im1_x,im1_y,im2_x,im2_y)
-        #HL /= HL[2,2]
-        #HR /= HR[2,2]
-        
-        # Compute Inliers
-        for m in range(len(x1)):
-            # Transpose Image 1 Point
-            im1_pt = np.array([[x1[m]], [y1[m]], [1]])
-            # Combine Image 2 Point Coordinates
-            im2_pt = np.array([x2[m], y2[m]])
-            # Transform Image 1 Point
-            im1_T = np.dot(H_Est,im1_pt)
-            # Convert Homogenous Coordinates to X,Y coordinates
-            #norm1 = np.array([float(im1_T[0])/float(im1_T[2]), float(im1_T[1])/float(im1_T[2])]) 
-            norm1 = np.array([im1_T[0]/im1_T[2], im1_T[1]/im1_T[2]])
-            # Calculate Distances and Error and Compare to Threshold,
-            # Must be less than or eqaul to threshold
-            if (np.sqrt(np.sum((norm1-im2_pt)**2)) <= thresh):
-                inlier_idx.append(m) # Save index of inlier
-                inlier_indT.append(1) # Denotes inlier
-            else:
-                inlier_indT.append(0) # Denotes outlier
-        
-        #print(np.count_nonzero(inlier_indT),nInliers,np.count_nonzero(inlier_indT) > nInliers)
-        # If number of inliers is greater than before, update inliers list
-        if (np.count_nonzero(inlier_indT) > nInliers):
-            inliers = inlier_idx # Save Inlier Index
-            inlier_ind = inlier_indT # Save T/F Vector for Output
-            nInliers = np.count_nonzero(inlier_indT) # Update Current Number of Inliers
-        #print('----')
-        
-        # clear variables
-        inlier_idx = [] # clear indices
-        inlier_indT = [] # clear Boolean
-    
-    #print('*************** END')
-    # Get Coordinates for Inliers
-    im1_xF = np.zeros(shape=(len(inliers),1))
-    im1_yF = np.zeros(shape=(len(inliers),1))
-    im2_xF = np.zeros(shape=(len(inliers),1))
-    im2_yF = np.zeros(shape=(len(inliers),1))
-    for i in range(len(inliers)):
-        j = inliers[i]
-        im1_xF[i] = x1[j]
-        im1_yF[i] = y1[j]
-        im2_xF[i] = x2[j]
-        im2_yF[i] = y2[j]
-    
-    # Compute Homography with Inliers
-    H = est_homography(im1_xF,im1_yF,im2_xF,im2_yF)
-    
-    return H, inlier_ind
+# Import Images
+# !! use new_ instead
+#imgL = cv2.imread('left.jpg')
+#imgM = cv2.imread('middle.jpg')
+#imgR = cv2.imread('right.jpg')
+
+# !! not a lot of overlap... very hard
+#imgL = cv2.imread('eng_left.jpg')
+#imgM = cv2.imread('eng_middle.jpg')
+#imgR = cv2.imread('eng_right.jpg')
+
+imgL = cv2.imread('new_left.jpg')
+imgM = cv2.imread('new_middle.jpg')
+imgR = cv2.imread('new_right.jpg')
+
+#imgL = cv2.imread('lib_left.jpg')
+#imgM = cv2.imread('lib_middle.jpg')
+#imgR = cv2.imread('lib_right.jpg')
+
+# Image Resizing
+scale_percent = 640/imgL.shape[1]*100 # percent of original size
+width = int(imgL.shape[1] * scale_percent / 100)
+height = int(imgL.shape[0] * scale_percent / 100)
+dim = (width, height)
+imgL = cv2.resize(imgL, dim, interpolation = cv2.INTER_AREA)
+imgM = cv2.resize(imgM, dim, interpolation = cv2.INTER_AREA)
+imgR = cv2.resize(imgR, dim, interpolation = cv2.INTER_AREA)
+
+# Grayscale
+grayL = cv2.cvtColor(imgL, cv2.COLOR_BGR2GRAY)
+grayM = cv2.cvtColor(imgM, cv2.COLOR_BGR2GRAY)
+grayR = cv2.cvtColor(imgR, cv2.COLOR_BGR2GRAY)
+
+print("preprocessing complete")
+
+#%% Feature Detection
+
+cimgL = corner_detector(grayL)
+cimgM = corner_detector(grayM)
+cimgR = corner_detector(grayR)
+
+print("corner detector complete")
+
+#%% ANMS
+
+# call functions
+max_pts = 300
+xL,yL,rmaxL = anms(cimgL, max_pts)
+xM,yM,rmaxM = anms(cimgM, max_pts)
+xR,yR,rmaxR = anms(cimgR, max_pts)
+
+# ignore features near edge
+xL,yL = ignore_edge_pts(xL,yL,height,width,20)
+xM,yM = ignore_edge_pts(xM,yM,height,width,20)
+xR,yR = ignore_edge_pts(xR,yR,height,width,20)
+
+# plot results
+# left
+anmsL = plt.imshow(imgL)
+plt.scatter(x=xL, y=yL, c='r', s=5)
+plt.show()
+# middle
+anmsM = plt.imshow(imgM)
+plt.scatter(x=xM, y=yM, c='r', s=5)
+plt.show()
+# right
+anmsR = plt.imshow(imgR)
+plt.scatter(x=xR, y=yR, c='r', s=5)
+plt.show()
+
+print("anms complete")
+
+#%% Feature Descriptors
+
+descsLR = feat_desc(imgL[:,:,0], xL, yL)
+descsLG = feat_desc(imgL[:,:,1], xL, yL)
+descsLB = feat_desc(imgL[:,:,2], xL, yL)
+descsL = np.concatenate((descsLR,descsLG,descsLB),axis=0)
+descsMR = feat_desc(imgM[:,:,0], xM, yM)
+descsMG = feat_desc(imgM[:,:,1], xM, yM)
+descsMB = feat_desc(imgM[:,:,2], xM, yM)
+descsM = np.concatenate((descsMR,descsMG,descsMB),axis=0)
+descsRR = feat_desc(imgR[:,:,0], xR, yR)
+descsRG = feat_desc(imgR[:,:,1], xR, yR)
+descsRB = feat_desc(imgR[:,:,2], xR, yR)
+descsR = np.concatenate((descsRR,descsRG,descsRB),axis=0)
+
+print("decriptors complete")
+
+#%% Feature Matching
+
+# Call function
+matchL = feat_match(descsM, descsL)
+matchR = feat_match(descsM, descsR)
+
+# Get feature coordiantes
+x1ML = []
+y1ML = []
+x2L = []
+y2L = []
+x1MR = []
+y1MR = []
+x2R = []
+y2R = []
+for i in range(len(matchL)):
+    if (matchL[i] != -1):
+        x1ML.append(xM[int(i)])
+        y1ML.append(yM[int(i)])
+        x2L.append(xL[int(matchL[i])])
+        y2L.append(yL[int(matchL[i])])
+    if (matchR[i] != -1):
+        x1MR.append(xM[int(i)])
+        y1MR.append(yM[int(i)])
+        x2R.append(xR[int(matchR[i])])
+        y2R.append(yR[int(matchR[i])])
+
+# Plot results
+# Left & middle
+plt.figure(figsize=(16,9))
+correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+plt.scatter(x=xL, y=yL, c='r', s=5)
+plt.scatter(x=xM+width, y=yM, c='r', s=5)
+for i in range(len(x1ML)):
+    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'-',linewidth=1)
+plt.show()
+# Middle & right
+plt.figure(figsize=(16,9))
+correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
+plt.scatter(x=xM, y=yM, c='r', s=5)
+plt.scatter(x=xR+width, y=yR, c='r', s=5)
+for i in range(len(x1MR)):
+    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'-',linewidth=1)
+plt.show()
+
+print("feature matching complete")
+
+#%% Random Sampling Consensus (RANSAC)
+
+# Call functions
+threshL = 1
+threshR = 1
+HL, inlier_indL = ransac_est_homography(x2L, y2L, x1ML, y1ML, threshL)
+HR, inlier_indR = ransac_est_homography(x2R, y2R, x1MR, y1MR, threshR)
+
+# Plot results
+# Left & middle
+plt.figure(figsize=(16,9))
+correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+plt.scatter(x=xL, y=yL, c='r', s=5)
+plt.scatter(x=xM+width, y=yM, c='r', s=5)
+for i in range(len(x1ML)):
+    if inlier_indL[i]==1:
+        plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'-',linewidth=1)
+plt.show()
+# Middle & right
+plt.figure(figsize=(16,9))
+correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
+plt.scatter(x=xM, y=yM, c='r', s=5)
+plt.scatter(x=xR+width, y=yR, c='r', s=5)
+for i in range(len(x1MR)):
+    if inlier_indR[i]==1:
+        plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'-',linewidth=1)
+plt.show()
+
+print("HL:")
+print(HL)
+print("HR:")
+print(HR)
+print("ransac complete")
+
+#%% Frame Mosaicing
+
+# Call function
+img_mosaic = mymosaic(imgL,imgM,imgR,HL,HR)
+
+# Show Mosaic
+cv2.namedWindow('Mosaic', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('Mosaic', 1200, 400)
+cv2.imshow('Mosaic', img_mosaic.astype(np.uint8))
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+#%% OpenCV Sanity Check
+
+## Compute homographies
+#src_pts = np.float32([(x,y) for x,y in zip(x2L,y2L)]).reshape(-1, 1, 2)
+#dst_pts = np.float32([(x,y) for x,y in zip(x1ML,y1ML)]).reshape(-1, 1, 2)
+#hlCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+#src_pts = np.float32([(x,y) for x,y in zip(x2R,y2R)]).reshape(-1, 1, 2)
+#dst_pts = np.float32([(x,y) for x,y in zip(x1MR,y1MR)]).reshape(-1, 1, 2)
+#hrCV,mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+#
+## Call function
+#img_mosaic = mymosaic(imgL,imgM,imgR,hlCV,hrCV)
+#
+## Show Mosaic
+#cv2.namedWindow('Mosaic', cv2.WINDOW_NORMAL)
+#cv2.resizeWindow('Mosaic', 600, 600)
+#cv2.imshow('Mosaic', img_mosaic.astype(np.uint8))
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
+
+ #%% Feature Match Individualized Visualization
+
+## one-by-one (left & middle)
+#for i in range(len(x1ML)):
+#    print("left & middle #" + str(i))
+#    plt.figure(figsize=(16,9))
+#    correspLM = plt.imshow(np.concatenate((imgL,imgM),axis=1))
+#    plt.scatter(x=xL, y=yL, c='r', s=5)
+#    plt.scatter(x=xM+width, y=yM, c='r', s=5)
+#    plt.plot([x2L[i],x1ML[i]+width],[y2L[i],y1ML[i]],'y-',linewidth=2)
+#    plt.show()
+#    print()
+#print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+## one-by-one (middle & right)
+#for i in range(len(x1MR)):
+#    print("middle and right #" + str(i))
+#    plt.figure(figsize=(16,9))
+#    correspMR = plt.imshow(np.concatenate((imgM,imgR),axis=1))
+#    plt.scatter(x=xM, y=yM, c='r', s=5)
+#    plt.scatter(x=xR+width, y=yR, c='r', s=5)
+#    plt.plot([x2R[i]+width,x1MR[i]],[y2R[i],y1MR[i]],'y-',linewidth=2)
+#    plt.show()
+#    print()

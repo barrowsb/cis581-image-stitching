@@ -1,18 +1,19 @@
 CIS 581 - Project 3A
-November 14, 2019
+November 14, 2019 (4 late days)
 Authors: Brian Barrows, Zachary Fisher, Michael Woc (Group 12)
 README
 
 Notes About Code:
-•	Code will print status updates to the command window to indicate which steps of images stitching have been completed.
+•	Code will print status updates to the command window to indicate which steps
+    of images stitching have been completed. Additionally, it will print plots
+    of the intermittent results when applicable.
 
 How to Run Code:
-1.	Ensure the “Current Folder” Python is running in matches the folder the code and images is in. Also, ensure the images and code are in the same folder and not in sub-folders.
-2.	Image stitching can be performed on each set of images using the same code by uncommenting the lines of code relevant to reading in each set of images.
-
-For example: 
-imgL = cv2.imread('new_left.jpg')
-imgM = cv2.imread('new_middle.jpg')
-imgR = cv2.imread('new_right.jpg')
-
-Where ‘new_left.jpg’, ‘new_middle.jpg’, and ‘new_right.jpg’ represent the names of the images being read in. These three images constitute one set of images.
+1.	Ensure the “Current Folder” Python is running in matches the folder the code
+    and images are in. Also, ensure the images and code are in the same folder
+    and not in sub-folders.
+2.	Image stitching can be performed on the provided set of images of Franklin
+    Field by running "wrapper_franklin.py". For the results on our own image
+    set, run "wrapper_bubble.py". Expect results in ~30 seconds. The final
+    mosaics will open in an OpenCV image window. RANSAC is non-deterministic
+    and, as a result you may need to run more than once to produce good results.
